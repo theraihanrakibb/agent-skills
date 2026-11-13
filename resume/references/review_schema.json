@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "review Skill Schema",
+  "description": "Input/output format for resume quality evaluation. The review skill performs pure diagnosis: it scores the resume across multiple dimensions and produces a list of concrete, actionable issues. It does NOT modify the resume.",
+  "input": {
+    "type": "object",
+    "required": ["resume"],
+    "additionalProperties": false,
+    "properties": {
+      "resume": {
+        "type": "string",
+        "description": "The resume markdown to evaluate. Can come from any source (user-written, AI-generated, output of other skills)."
+      },
+      "jd": {
+        "type": "string",
+        "description": "Optional: target job description. When provided, the skill evaluates the jdMatch dimension by checking each key requirement against the resume."
+      },
+      "sourceTexts": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Optional: original source materials (e.g. raw user inputs, dig conversation transcripts). When provided, the skill performs anti-hallucination checks and evaluates the truthfulness dimension."
+      },
+      "pdfText": {
+        "type": "string",
+        "description": "Optional: raw text extracted from the resume's PDF (the rendered text layer). When provided, the skill runs the ATS / parseability check (broken/split tokens, stray hyphens, ligature artifacts, bilingual keyword duplication). ATS cannot be assessed from markdown alone, so omit this when no PDF text is available."
+      },
+      "language": {
+        "type": "string",
+        "enum": ["zh-CN", "en"],
+        "default": "zh-CN",
+        "description": "Output language for issue descriptions, suggestions, and summary."
+      }
+    }
+  },
+  "output": {
+    "type": "object",
+    "required": ["score", "dimensions", "issues", "summary"],
+    "additionalProperties": false,
+    "properties": {
+      "score": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "description": "Overall quality score (weighted average of dimensions). Two decimals. When truthfulness < 0.5, score is capped at 0.5 regardless of other dimensions."
+      },
+      "dimensions": {
+        "type": "object",
+        "required": ["expression", "structure", "credibility"],
+        "additionalProperties": false,
+        "properties": {
+          "expression": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "How vivid, action-oriented, quantified, and concrete the language is."
+          },
+          "structure": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Whether the section ordering, focus, and length allocation are reasonable."
+          },
+          "credibility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Whether claims are backed by concrete facts (numbers, tech stack, deliverables) and internally consistent."
+          },
+          "jdMatch": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Only present when jd is provided. Score equals the proportion of JD key requirements covered by the resume (partial coverage counts as 0.5)."
+          },
+          "truthfulness": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Only present when sourceTexts is provided. Measures whether resume facts/numbers can be traced back to source materials. Fabrications drive this dimension toward 0."
+          },
+          "ats": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Only present when pdfText is provided. Parseability of the resume's text layer for ATS: no broken/split tokens, no stray hyphens, no ligature artifacts, no unintended keyword duplication from a bilingual text layer."
+          }
+        }
+      },
+      "issues": {
+        "type": "array",
+        "description": "Concrete issues sorted from most to least severe. Truthfulness issues come first, then jdMatch gaps, then severe credibility/expression/structure issues, then minor optimizations.",
+        "items": {
+          "type": "object",
+          "required": ["type", "problem", "suggestion"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["expression", "structure", "credibility", "jdMatch", "truthfulness", "ats"],
+              "description": "Which dimension this issue belongs to."
+            },
+            "location": {
+              "type": "string",
+              "description": "Specific location in the resume (e.g. 'Work Experience - Alibaba - bullet 3', 'Education first line'). Use '全文' / 'whole resume' only for global issues."
+            },
+            "problem": {
+              "type": "string",
+              "description": "Concrete description of what is wrong. Must not be vague (avoid 'expression is bad'); be specific."
+            },
+            "suggestion": {
+              "type": "string",
+              "description": "Actionable fix. Must specify HOW to fix (e.g. 'add concrete numbers like QPS and P99 latency'), not vague advice like 'write better'."
+            }
+          }
+        }
+      },
+      "summary": {
+        "type": "string",
+        "description": "2-3 sentence overall assessment covering key strengths and the most important areas for improvement. May suggest downstream skills (polish / dig / generate) when appropriate."
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "polish Skill Schema",
+  "description": "Input/output format for resume optimization",
+  "input": {
+    "type": "object",
+    "required": ["resume"],
+    "properties": {
+      "resume": {
+        "type": "string",
+        "description": "The existing resume in markdown format (any version, any source)"
+      },
+      "jd": {
+        "type": "string",
+        "description": "Optional: target job description for targeted optimization"
+      },
+      "reviewReport": {
+        "type": "object",
+        "description": "Optional: output from review skill for targeted fixes",
+        "properties": {
+          "score": { "type": "number" },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "location": { "type": "string" },
+                "problem": { "type": "string" },
+                "suggestion": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "instructions": {
+        "type": "string",
+        "description": "Optional: specific user instructions (e.g. 'shorten to 1 page', 'highlight leadership')"
+      },
+      "preserveLayout": {
+        "type": "boolean",
+        "default": false,
+        "description": "Optional: when true, the user has a designed PDF and wants the layout preserved. The skill must NOT emit a full markdown rewrite; instead 'markdown' becomes a compact before→after diff of only the changed fragments, plus a note. Use this to avoid destroying a custom PDF layout."
+      },
+      "sourceTexts": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Optional: original source materials for anti-hallucination reference"
+      },
+      "language": {
+        "type": "string",
+        "enum": ["zh-CN", "en"],
+        "default": "zh-CN"
+      }
+    }
+  },
+  "output": {
+    "type": "object",
+    "required": ["markdown", "changes", "strategy"],
+    "properties": {
+      "markdown": {
+        "type": "string",
+        "description": "The optimized resume in markdown format. When preserveLayout is true, this is instead a compact before→after diff of only the changed fragments (not a full rewrite), with a note that the user applies edits to their existing PDF source."
+      },
+      "changes": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Summary list of changes made"
+      },
+      "strategy": {
+        "type": "string",
+        "description": "Brief explanation of the optimization strategy used"
+      },
+      "suggestions": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Suggestions for further improvement (e.g. 'use dig to add more quantified achievements')"
+      }
+    }
+  }
+}
