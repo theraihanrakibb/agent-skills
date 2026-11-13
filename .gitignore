@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# Local state produced by the job-hunt tools (regenerated on use)
+job_scraper/
+company_research/
+*.csv
