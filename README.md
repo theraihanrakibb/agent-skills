@@ -1,18 +1,37 @@
-﻿# agent-skills
+﻿# Agent Skills
 
-![CI](https://github.com/theraihanrakibb/agent-skills/actions/workflows/ci.yml/badge.svg)
+> A portable collection of AI-agent skills for writing, job hunting, resumes, portfolio audits,
+> commit/PR drafting, AI-infra contribution, and social-media content — installable in **any**
+> agent that reads `SKILL.md`. Ships as a **CodeBuddy Code plugin** and a **full-stack web UI**
+> (FastAPI + React).
 
-A portable collection of AI-agent skills for writing, job hunting, resumes, portfolio audits, commit/PR drafting, AI-infra contribution, and social-media content — plus a **CodeBuddy Code plugin** that bundles them with slash commands and a git-commit guard, and a **full-stack web UI** (FastAPI + React) that wraps every skill as an HTTP endpoint. Each skill is a self-contained folder with a `SKILL.md` that any compatible agent can discover and load. No branding, no lock-in — drop the folders you want into your agent and go.
+[![CI](https://github.com/theraihanrakibb/agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/theraihanrakibb/agent-skills/actions)
+
+**No branding, no lock-in** — copy the folders you want and go. Every skill is MIT-licensed and
+derived from MIT upstream sources.
+
+## Contents
+
+- [What's inside](#whats-inside)
+- [Install the skills](#install-the-skills)
+- [CodeBuddy plugin](#codebuddy-plugin)
+- [Website](#website)
+- [Safety](#safety)
+- [Validation](#validation)
+- [License & attribution](#license--attribution)
 
 ## What's inside
+
+Eight self-contained skills. Each lives in its own folder with a `SKILL.md` (discovery) and
+`README.md` (walkthrough).
 
 **Writing & job search**
 
 | Skill | What it does |
 |-------|--------------|
-| [`humanizer`](humanizer/) | Rewrites AI-sounding text so it reads like a human wrote it — without changing what it says. |
-| [`job-hunt`](job-hunt/) | End-to-end job search: search & rank, score fit, tailor CV/cover letter, application workflow, interview prep, skill-gap analysis. |
-| [`resume`](resume/) | Resume review (diagnose) + polish (improve) with ATS checks, layout-preserving mode, bilingual (EN / 中文). |
+| [`humanizer`](humanizer/) | Rewrites AI-sounding text so it reads like a human wrote it — without changing meaning. |
+| [`job-hunt`](job-hunt/) | End-to-end search & rank, fit scoring, CV/cover-letter tailoring, application workflow, interview prep, skill-gap analysis. |
+| [`resume`](resume/) | Resume review (diagnose) + polish (improve) with ATS checks, layout-preserving mode, bilingual EN / 中文. |
 
 **Portfolio, dev workflow & content**
 
@@ -24,29 +43,30 @@ A portable collection of AI-agent skills for writing, job hunting, resumes, port
 | [`ai-infra-helper`](ai-infra-helper/) | Contributor coach for AI-inference repos (SGLang/vLLM/…): navigation, test commands, PR drafting, fork-PR CI gotchas. |
 | [`social-media`](social-media/) | Repurposes one idea into FB/IG/YouTube/X/LinkedIn/Gmail drafts + a content calendar. |
 
-All skills are **MIT-licensed** and derived from MIT upstream sources.
+Every skill runs as a short, interactive flow: it asks for what it needs, shows its work, and waits
+for your approval before any action that changes something (committing, submitting).
 
-## Install the skills anywhere
+## Install the skills
 
-These are standard skills. Copy the skill folders you want into your agent's skills directory:
+These are standard `SKILL.md`-based skills. Copy the folders you want into your agent's skills directory:
 
 - **Claude Code / Claude.ai** — `~/.claude/skills/` (or project-local `.claude/skills/`)
-- **Codex / other agents that read `SKILL.md`** — your agent's skills directory
-- **Any agent** — copy the folder; discovered via the `name` / `description` frontmatter in `SKILL.md`
+- **Codex / any `SKILL.md`-reading agent** — your agent's skills directory
 
 ```bash
-# Example: install everything into Claude Code
+# install everything into Claude Code
 cp -r humanizer job-hunt resume portfolio-audit job-application pr-draft ai-infra-helper social-media ~/.claude/skills/
 ```
 
-### Requirements
+**Requirements** — `job-hunt` bundles optional Python helpers (`tools/`); `portfolio-audit`, `pr-draft`,
+and `social-media` bundle optional bash helpers (`scripts/`). Both work with the agent's own tools if
+you skip them. No external API keys required.
 
-- `job-hunt` bundles optional Python helpers (`tools/`); `portfolio-audit`, `pr-draft`, and `social-media` bundle optional bash helpers (`scripts/`). Both work with the agent's own tools if you don't use them.
-- No external API keys required.
+## CodeBuddy plugin
 
-## Plugin (CodeBuddy Code)
-
-The repo doubles as a CodeBuddy Code plugin (`plugin.json` in [`.codebuddy-plugin/`](.codebuddy-plugin/)). It bundles the five workflow skills above as **slash commands** plus a **PreToolUse commit guard** that blocks AI-generation footers and nudges Conventional Commits.
+The repo doubles as a CodeBuddy Code plugin (`.codebuddy-plugin/plugin.json`). It bundles the five
+workflow skills as **slash commands** plus a **PreToolUse commit guard** that blocks AI-generation
+footers and nudges Conventional Commits.
 
 | Slash command | What it does |
 |---|---|
@@ -62,30 +82,30 @@ The repo doubles as a CodeBuddy Code plugin (`plugin.json` in [`.codebuddy-plugi
 cc --plugin-dir /path/to/agent-skills
 ```
 
-Hooks load at session start; run `/hooks` to verify. For a persistent install, use `scripts/sync-to-cache.sh` and register the plugin in `~/.codebuddy/installed_plugins.json` (plugin id `agent-skills@local`), then enable it in `~/.codebuddy/settings.json` → `enabledPlugins`.
+Hooks load at session start; run `/hooks` to verify. For a persistent install, use
+`scripts/sync-to-cache.sh` and register the plugin in `~/.codebuddy/installed_plugins.json`
+(plugin id `agent-skills@local`), then enable it in `~/.codebuddy/settings.json` → `enabledPlugins`.
 
-## Website (FastAPI + React)
+## Website
 
-A full-stack web UI for the five workflow skills lives in [`website/`](website). See [`website/README.md`](website/README.md) for full instructions.
+A full-stack web UI that wraps the five workflow skills as HTTP endpoints lives in
+[`website/`](website) — **FastAPI + React + Vite**, template-based (no LLM needed, runs out of the box).
 
 ```bash
-# backend
+# backend  (terminal 1)
 cd website/backend && pip install -r requirements.txt && uvicorn main:app --reload --port 8000
-# frontend (separate terminal)
+# frontend (terminal 2)
 cd website/frontend && npm install && npm run dev
 ```
 
-App at http://localhost:5173, API docs at http://localhost:8000/docs. One-command full stack:
+App at http://localhost:5173, API docs at http://localhost:8000/docs. One-command full stack via Docker:
 
 ```bash
 cd website && docker compose up --build   # app :8080, API :8000
 ```
 
-Deploy: frontend → Vercel, backend → Fly.io. Steps in [`website/DEPLOY.md`](website/DEPLOY.md).
-
-## How the skills guide you
-
-Every skill runs as a short, interactive flow: it asks for what it needs, shows its work, and waits for your approval before any action that changes something (e.g., committing, submitting). See each skill's `README.md` for the full walkthrough.
+**Deploy** — frontend → Vercel, backend → Fly.io; or the whole thing on Vercel alone (serverless
+Python function). Full step-by-step in [`website/DEPLOY.md`](website/DEPLOY.md).
 
 ## Safety
 
@@ -99,11 +119,14 @@ Every push runs CI that:
 
 - checks each skill ships a `SKILL.md` (with `name` + `description` frontmatter) and a `README.md`;
 - compiles the bundled Python tools (`job-hunt/tools/`) and runs their unit tests;
-- syntax-checks the bundled shell scripts (`bash -n`) and runs `shellcheck` on the plugin `scripts/` + `hooks/`;
-- validates the JSON schemas under `resume/references/` and the plugin manifests (`.codebuddy-plugin/plugin.json`, `hooks/hooks.json`);
-- runs the **website backend** tests (`website/backend/tests/`) after `ruff check`;
-- builds the **website frontend** (`website/frontend` `npm run build`).
+- syntax-checks bundled shell scripts (`bash -n`) and runs `shellcheck` on `scripts/` + `hooks/`;
+- validates JSON schemas (`resume/references/`) and plugin manifests (`.codebuddy-plugin/plugin.json`, `hooks/hooks.json`);
+- runs the website backend tests (`website/backend/tests/`) after `ruff check`;
+- builds the website frontend (`website/frontend`, `npm run build`).
 
 ## License & attribution
 
-MIT. Upstream sources: `humanizer` (Wikipedia "Signs of AI writing"), `job-hunt` (job-application-assistant + job-scraper + upskill), `resume` (resume-review + resume-polish), and the `toolkit-skills` collection (portfolio-audit, job-application, pr-draft, ai-infra-helper, social-media). The plugin manifest and website were consolidated here from `toolkit-skills`.
+MIT. Upstream sources: `humanizer` (Wikipedia "Signs of AI writing"), `job-hunt`
+(job-application-assistant + job-scraper + upskill), `resume` (resume-review + resume-polish), and the
+`toolkit-skills` collection (`portfolio-audit`, `job-application`, `pr-draft`, `ai-infra-helper`,
+`social-media`). The plugin manifest and website were consolidated here from `toolkit-skills`.
