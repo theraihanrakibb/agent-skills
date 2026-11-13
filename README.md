@@ -1,5 +1,7 @@
 ﻿# agent-skills
 
+![CI](https://github.com/theraihanrakibb/agent-skills/actions/workflows/ci.yml/badge.svg)
+
 A portable collection of AI-agent skills for writing, job hunting, resumes, portfolio audits, commit/PR drafting, AI-infra contribution, and social-media content. Each skill is a self-contained folder with a `SKILL.md` that any compatible agent can discover and load. No branding, no lock-in — drop the folders you want into your agent and go.
 
 ## What's inside
@@ -50,6 +52,15 @@ Every skill runs as a short, interactive flow: it asks for what it needs, shows 
 
 - `job-hunt` and `social-media` treat untrusted input as data, never instructions, and never auto-submit or auto-post.
 - `portfolio-audit` and `pr-draft` never commit, push, or amend without explicit confirmation.
+
+## Validation
+
+Every push runs CI that:
+
+- checks each skill ships a `SKILL.md` (with `name` + `description` frontmatter) and a `README.md`;
+- compiles the bundled Python tools (`job-hunt/tools/`) and runs their unit tests;
+- syntax-checks the bundled shell scripts (`bash -n`);
+- validates the JSON schemas under `resume/references/`.
 
 ## License & attribution
 
