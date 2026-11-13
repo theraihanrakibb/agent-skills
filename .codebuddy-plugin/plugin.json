@@ -1,0 +1,12 @@
+{
+  "name": "agent-skills",
+  "displayName": "Agent Skills",
+  "version": "1.0.0",
+  "description": "Agent Skills: portfolio auditor, job-application accelerator, clean commit/PR writer, AI-infra contributor coach, and social-media content drafter.",
+  "author": {
+    "name": "MD RAKIBUL ISLAM RAIHAN",
+    "url": "https://github.com/theraihanrakibb"
+  },
+  "license": "MIT",
+  "keywords": ["portfolio", "job-hunt", "git", "ai-infra", "social-media", "productivity"]
+}
